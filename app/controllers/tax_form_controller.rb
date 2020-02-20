@@ -1,7 +1,6 @@
 class TaxFormController < ApplicationController
 
   def upload_form
-    Rails.logger.debug("Here's the given params: #{tax_form_params}")
     @tax_form = TaxForm.new(tax_form_params)
 
     if @tax_form.save
