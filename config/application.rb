@@ -22,6 +22,9 @@ module Doppel
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 5.2
 
+    # Load lib/ so things like JWT related code is loaded before any usages
+    config.autoload_paths << Rails.root.join('lib')
+
     config.middleware.insert_before 0, Rack::Cors do
       allow do
         origins '*'
