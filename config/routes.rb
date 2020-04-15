@@ -5,4 +5,5 @@ Rails.application.routes.draw do
 
   # resources :tax_forms, only: [:upload_form]
   post 'tax_form/upload_form'
+  get 'hello-world', to: 'application#hello_world'
 end

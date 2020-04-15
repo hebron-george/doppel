@@ -2,6 +2,10 @@ class ApplicationController < ActionController::API
   before_action :authenticate_request
   attr_reader :current_user
 
+  def hello_world
+    render json: {message: "Hello World from the back end!"}, status: :ok
+  end
+
   private
 
   def authenticate_request
