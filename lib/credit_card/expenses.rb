@@ -3,44 +3,63 @@ require 'csv'
 module Doppel
   module CreditCard
     module Expenses
-      def self.expenses(path_to_file)
-        g = CSV.read(path_to_file)
-        all_expenses = g.map { |a| Hash[ g.first.zip(a) ] }.drop(1)
-      end
+      class ExpenseYear
+        attr_reader :year
 
-      def self.expenses_by_day(expenses)
-        filtered_expenses = {}
-        expenses.each do |expense|
-          date = expense["Date"]
-          filtered_expenses[date] ||= []
-          filtered_expenses[date] << expense
+        def initialize(year)
+          @year = year
         end
-        filtered_expenses
-      end
 
-      def self.totals_by_day(expenses_by_day)
-        totals_expenses_for_each_day = {}
-        expenses_by_day.each do |date, expenses|
-          totals_expenses_for_each_day[date] = expenses.map { |e| e["Amount"].to_f }.select { |amount| amount > 0}.sum.round(2)
+        def rideshare
+          binding.pry
+          @rideshare ||= expenses.where(description: ['uber', 'UBER', 'lyft', 'LYFT', 'via', 'VIA'])
         end
-        totals_expenses_for_each_day
+
+        def takeout
+          # What's the relationship to food?
+          takeout_companies = ['seamless', 'uber eats', 'ubereats', 'grubhub', 'seamlss']
+          takeout_expenses = expenses.select do |e|
+            takeout_companies.any? { |restaurant| e.description.downcase.include?(restaurant) }
+          end
+
+          seamless_expenses  = takeout_expenses.select { |e| ['seamless', 'seamlss', 'grubhub'].any? { |r| e.description.downcase.include?(r) } }
+          uber_eats_expenses = takeout_expenses.select { |e| ['uber eats', 'ubereats'].any? { |r| e.description.downcase.include?(r) } }
+
+          {
+            total_spend:     takeout_expenses.sum(&:amount),
+            seamless_spend:  seamless_expenses.sum(&:amount),
+            uber_eats_spend: uber_eats_expenses.sum(&:amount),
+          }
+        end
+
+        def food
+          # What's the relationship to takeout?
+        end
+
+        def rent
+
+        end
+
+        def amazon
+
+        end
+
+        def coffee
+
+        end
+
+        def travel
+
+        end
+
+        private
+
+        def expenses
+          beginning_of_year = Date.new(year)
+          end_of_year       = beginning_of_year.end_of_year
+          @expenses ||= CreditCardExpense.where(expense_date: beginning_of_year..end_of_year)
+        end
       end
-
-      def self.counts_by_day(expenses_by_day)
-        count_of_expenses_by_day= Hash.new(0)
-        expenses_by_day.each { |date, expenses| count_of_expenses_by_day[date] += 1 }
-        count_of_expenses_by_day
-      end
-
-      def self.summary(expenses)
-
-        {
-          expenses_by_day: expenses_by_day(expenses),
-          totals_by_day: totals_by_day(expenses_by_day(expenses)),
-          counts_by_day: counts_by_day(expenses),
-        }
-      end
-
     end
   end
 end
